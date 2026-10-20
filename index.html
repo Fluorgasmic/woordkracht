@@ -285,6 +285,9 @@ small,.muted{color:var(--ink2)}
 .vpick{flex:1;text-align:left;padding:10px 14px;border:2.5px solid var(--line);border-radius:12px;background:var(--panel)}
 .vrow.on .vpick{background:var(--energy);color:#1F1B16;font-weight:700}
 .vrow.on .vpick small{color:#4a3d1a}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:80;max-width:min(560px,92vw);background:var(--panel);color:var(--ink);
+  border:3px solid var(--line);border-radius:14px;box-shadow:4px 4px 0 var(--line);padding:12px 16px;font-size:.85em;animation:slideup .3s ease-out}
+.danger.armed{background:var(--boss);color:#fff}
 .danger{border:2.5px solid var(--boss);color:var(--boss);background:transparent;border-radius:12px;padding:10px 14px}
 
 @media (max-width:560px){
@@ -472,30 +475,56 @@ function chunksFor(text, lang, mode, w){
   if (art && S.settings.sep) return {chunks:[art, rest], gap:230};
   return {chunks:[text], gap:0};
 }
+/* Lecture robuste : Chrome sur Mac peut se bloquer si on enchaîne trop vite
+   « stop » et « parle ». On n'arrête que ce qui parle vraiment, on laisse un
+   court délai, on garde une référence aux phrases (sinon le navigateur les
+   oublie) et on surveille que la voix démarre bien. */
+const keepAlive = [];
+let stuckWarned = false;
 function speakNow(text, lang, mode, w){
   try {
-    speechSynthesis.cancel();
     const tok = ++speakToken;
+    const busy = speechSynthesis.speaking || speechSynthesis.pending;
+    if (busy) speechSynthesis.cancel();
     const v = pickVoice(lang);
     lastVoice[lang] = v ? v.name + ' (' + v.lang + ')' : 'aucune';
     const {chunks, gap} = chunksFor(text, lang, mode, w);
     const rate = mode ? S.settings.slow : (lang === 'nl' ? S.settings.rate : 1);
-    let i = 0;
-    const next = () => {
+    let i = 0, retried = false;
+    const sayChunk = () => {
       if (tok !== speakToken || i >= chunks.length) return;
-      const u = new SpeechSynthesisUtterance(chunks[i++]);
+      const u = new SpeechSynthesisUtterance(chunks[i]);
       u.lang = v ? v.lang : (lang === 'nl' ? 'nl-BE' : 'fr-BE');
       if (v) u.voice = v;
       u.rate = rate;
-      let fired = false;
-      const after = () => { if (fired) return; fired = true; setTimeout(next, gap); };
-      u.onend = after; u.onerror = after;
-      /* filet de sécurité si le navigateur oublie de signaler la fin */
-      setTimeout(after, 900 + u.text.length * 160 / rate);
+      keepAlive.push(u); if (keepAlive.length > 20) keepAlive.shift();
+      let started = false, done = false;
+      const finish = () => { if (done) return; done = true; i++; if (tok === speakToken) setTimeout(sayChunk, gap); };
+      u.onstart = () => {
+        started = true;
+        /* filet de sécurité si la fin n'est jamais signalée */
+        setTimeout(finish, 1500 + u.text.length * 180 / rate);
+      };
+      u.onend = finish;
+      u.onerror = e => { if (e && (e.error === 'interrupted' || e.error === 'canceled')) return; finish(); };
       speechSynthesis.speak(u);
+      setTimeout(() => {
+        if (started || done || tok !== speakToken) return;
+        speechSynthesis.cancel();
+        if (!retried){ retried = true; setTimeout(sayChunk, 250); }
+        else voiceStuck();
+      }, 2200);
     };
-    next();
+    setTimeout(sayChunk, busy ? 120 : 0);
   } catch(e) {}
+}
+function voiceStuck(){
+  if (stuckWarned) return; stuckWarned = true;
+  toast('🔇 La voix ne répond plus. Ferme complètement le navigateur (sur Mac : Cmd + Q), puis rouvre l\'appli.');
+}
+function toast(msg){
+  const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg;
+  document.body.appendChild(t); setTimeout(() => t.remove(), 9000);
 }
 /* la tortue : 1er toucher = lent, mot par mot ; 2e toucher sur le même mot = syllabe par syllabe */
 let lastSlow = {w:null, t:0, lvl:0};
@@ -1065,6 +1094,7 @@ function endBattle(){
    ========================================================= */
 let resetArmed = false;
 function settings(){
+  const old = modal.querySelector('.sheet'); const keepScroll = old ? old.scrollTop : 0;
   const nv = nlVoices();
   const seg = (key, opts) => `<div class="seg">${opts.map(o => `<button class="${String(S.settings[key]) === String(o[0]) ? 'on' : ''}" data-a="set" data-k="${key}" data-v="${esc(o[0])}">${o[1]}</button>`).join('')}</div>`;
   modal.innerHTML = `
@@ -1099,11 +1129,13 @@ function settings(){
           <div class="note">« Réduites » garde les écrans calmes : utile si les effets le distraient.</div></div>
         <div class="set"><label>Petits sons</label>${seg('sfx', [['true','Oui'], ['false','Non']])}</div>
         <div class="set"><label>Progression</label>
-          <button class="danger" data-a="reset">${resetArmed ? 'Sûr ? Touche encore pour tout effacer' : 'Effacer la progression'}</button>
+          <button class="danger ${resetArmed ? 'armed' : ''}" data-a="reset">${resetArmed ? 'Sûr ? Touche encore pour tout effacer' : 'Effacer la progression'}</button>
           <div class="note">Krachtniveau : ${S.power} · combats joués : ${S.sessions}. La progression est enregistrée sur cet appareil.</div></div>
       </div>
     </div>`;
+  restoreScroll(keepScroll);
 }
+function restoreScroll(y){ const sh = modal.querySelector('.sheet'); if (sh) sh.scrollTop = y; }
 function setSetting(k, v){
   if (v === 'true') v = true; else if (v === 'false') v = false;
   else if (k === 'rate' || k === 'rounds' || k === 'slow') v = Number(v);
@@ -1154,7 +1186,7 @@ document.addEventListener('click', e => {
     case 'voicetest': { const keep = S.settings.voice; S.settings.voice = el.dataset.v; speak('Hallo! De keuken, het huis.'); S.settings.voice = keep; break; }
     case 'reset':
       if (!resetArmed){ resetArmed = true; settings(); }
-      else { S.power = 0; S.words = {}; S.sessions = 0; resetArmed = false; save(); settings(); }
+      else { S.power = 0; S.words = {}; S.sessions = 0; resetArmed = false; save(); settings(); toast('✓ Progression effacée.'); }
       break;
     case 'sayword': speak(full(curTheme.mots[+el.dataset.i])); break;
     case 'learn': learn(0); break;
