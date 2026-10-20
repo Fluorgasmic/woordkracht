@@ -43,6 +43,12 @@ Ouvre `contenu.js` avec un éditeur de texte (TextEdit en mode « texte brut »,
 
 Pour un nouveau thème, copie un bloc `{ id: ..., mots: [...] }` en entier et change l'`id` (un mot court, sans espace ni accent). Attention aux virgules entre les blocs et entre les mots : c'est l'erreur la plus fréquente. Si l'appli affiche une page blanche après une modification, c'est presque toujours une virgule ou un guillemet oublié.
 
+## Les images et les animations
+
+Les illustrations du dossier `images/` ont été générées avec Magnific dans un même style manga : la mascotte (`mascotte.webp`), les six boss (`boss-*.webp`) et les verbes du thème « Mijn dag ». Elles ont un fond transparent pour fonctionner aussi en mode sombre. Les autres thèmes utilisent encore des emojis.
+
+Pendant un combat, la mascotte affronte un boss : chaque bonne réponse envoie une boule d'énergie, fait perdre de la vie au boss et déclenche une onomatopée. Le réglage « Animations : Réduites » coupe ces effets si ton fils s'en trouve distrait. Pendant qu'il lit une question, seuls la mascotte et le boss bougent doucement en haut de l'écran : les effets arrivent au moment de la réponse.
+
 ## Ajouter des images
 
 1. Crée un dossier `images/` à côté de `index.html`.

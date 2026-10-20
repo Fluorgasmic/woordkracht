@@ -72,7 +72,7 @@ small,.muted{color:var(--ink2)}
 .power{display:flex;gap:16px;align-items:center;padding:16px 18px;position:relative;overflow:hidden}
 .power::before{content:"";position:absolute;inset:0;opacity:.5;pointer-events:none;
   background:repeating-conic-gradient(from 0deg at 0% 50%, transparent 0 6deg, rgba(255,197,49,.35) 6deg 9deg)}
-.aura{position:relative;width:84px;height:84px;flex:none;border-radius:50%;display:grid;place-items:center;font-size:46px;
+.aura{position:relative;width:96px;height:96px;flex:none;border-radius:50%;display:grid;place-items:center;font-size:46px;
   background:radial-gradient(circle,var(--energy) 0 45%,var(--energy2) 70%,transparent 72%);
   animation:aura 2.4s ease-in-out infinite}
 @keyframes aura{50%{transform:scale(1.07);filter:drop-shadow(0 0 10px var(--energy))}}
@@ -109,7 +109,10 @@ small,.muted{color:var(--ink2)}
 .vis-img{object-fit:contain;display:block}
 .v-sm{font-size:34px}.v-sm.vis-color{width:34px;height:34px}.v-sm.vis-img{width:40px;height:40px}
 .v-md{font-size:68px}.v-md.vis-color{width:74px;height:74px}.v-md.vis-img{width:96px;height:96px}
-.v-lg{font-size:118px}.v-lg.vis-color{width:120px;height:120px}.v-lg.vis-img{width:170px;height:170px}
+.v-lg{font-size:118px}.v-lg.vis-color{width:120px;height:120px}.v-lg.vis-img{width:200px;height:200px}
+.v-pr{font-size:48px}.v-pr.vis-color{width:48px;height:48px}.v-pr.vis-img{width:70px;height:70px}
+.v-md.vis-img{width:110px;height:110px}
+.grid4 .opt{min-height:150px}.grid4 .v-md.vis-img{width:140px;height:140px}
 
 /* ---- mots : article + syllabes ---- */
 .art{display:inline-block;font-weight:700;border-radius:10px;padding:0 .35em;margin-right:.3em;border:2.5px solid currentColor}
@@ -286,9 +289,57 @@ small,.muted{color:var(--ink2)}
   .lt{width:36px;height:52px}
   .feedback{flex-wrap:wrap}
 }
+/* ---- animations ---- */
+@keyframes enter{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+#app.enter{animation:enter .3s ease-out}
+@keyframes popin{0%{opacity:0;transform:scale(.6) translateY(10px)}70%{opacity:1;transform:scale(1.05)}100%{opacity:1;transform:none}}
+.pop{animation:popin .42s cubic-bezier(.2,.8,.3,1.25) backwards;animation-delay:calc(var(--i,0) * 70ms)}
+@keyframes bob{50%{transform:translateY(-5px)}}
+.bob{animation:bob 2.6s ease-in-out infinite}
+.mascot{width:118px;height:118px;object-fit:contain;position:relative;margin:-18px -8px -14px -10px;filter:drop-shadow(2px 3px 0 rgba(0,0,0,.25))}
+.fighters{flex:1;display:flex;align-items:center;gap:8px;padding:6px 12px;min-width:0;position:relative}
+.hero{width:70px;height:70px;flex:none;display:grid;place-items:center}
+.hero img{width:84px;height:84px;object-fit:contain}
+.vs{font-family:Bangers,var(--font);font-size:1.3em;color:var(--boss);-webkit-text-stroke:1px var(--line);paint-order:stroke fill;flex:none}
+.boss-face{font-size:46px;line-height:1;display:inline-grid;place-items:center;width:68px;height:68px;flex:none;position:relative}
+.boss-face img{width:76px;height:76px;object-fit:contain}
+.dmg{position:fixed;z-index:56;pointer-events:none;font-family:Bangers,sans-serif;font-size:34px;color:#fff;-webkit-text-stroke:2px #C1121F;paint-order:stroke fill;animation:dmg .9s ease-out forwards}
+@keyframes dmg{0%{transform:translate(-50%,0) scale(.5);opacity:0}20%{transform:translate(-50%,-14px) scale(1.2);opacity:1}100%{transform:translate(-50%,-60px) scale(1);opacity:0}}
+.particle{position:fixed;z-index:55;pointer-events:none;width:14px;height:14px;margin:-7px 0 0 -7px;animation:burst .75s cubic-bezier(.1,.7,.3,1) forwards}
+.particle.star{clip-path:polygon(50% 0,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%)}
+.particle.dot{border-radius:50%}
+@keyframes burst{0%{transform:translate(0,0) scale(1) rotate(0)}100%{transform:translate(var(--dx),var(--dy)) scale(.2) rotate(var(--r));opacity:0}}
+.blast{position:fixed;z-index:45;pointer-events:none;width:38px;height:38px;margin:-19px 0 0 -19px;border-radius:50%;
+  background:radial-gradient(circle,#fff 0 25%,var(--energy) 45%,var(--energy2) 68%,transparent 72%);box-shadow:0 0 20px 6px rgba(255,197,49,.7)}
+.lunge{animation:lunge .4s}
+@keyframes lunge{35%{transform:translateX(12px) scale(1.12) rotate(-6deg)}}
+.lt.done,.slot.fill{animation:letterpop .28s}
+@keyframes letterpop{45%{transform:scale(1.28)}}
+.opt.good,.pbtn.done{animation:goodpop .4s}
+@keyframes goodpop{40%{transform:scale(1.08)}}
+.feedback{animation:slideup .3s ease-out}
+@keyframes slideup{from{transform:translateY(24px);opacity:0}to{transform:none;opacity:1}}
+.card.from-r{animation:fromr .32s ease-out}.card.from-l{animation:froml .32s ease-out}
+@keyframes fromr{from{transform:translateX(40px) rotate(2deg);opacity:0}to{transform:none;opacity:1}}
+@keyframes froml{from{transform:translateX(-40px) rotate(-2deg);opacity:0}to{transform:none;opacity:1}}
+.ko-boss{animation:ko 1.1s .2s forwards}
+@keyframes ko{0%{transform:none}25%{transform:translateY(-14px) rotate(-12deg)}100%{transform:translateY(16px) rotate(100deg) scale(.85);filter:grayscale(1);opacity:.55}}
+.stamp{position:absolute;top:14px;right:10%;font-family:Bangers,sans-serif;font-size:56px;color:var(--boss);border:5px solid var(--boss);border-radius:12px;padding:0 12px;
+  transform:rotate(14deg);opacity:0;animation:stamp .35s 1.1s cubic-bezier(.2,1.6,.4,1) forwards;background:rgba(255,255,255,.85)}
+@keyframes stamp{0%{opacity:0;transform:rotate(14deg) scale(2.4)}100%{opacity:1;transform:rotate(14deg) scale(1)}}
+.res-mascot{width:150px;height:150px;object-fit:contain;animation:jump 1s 1.3s ease-in-out 2}
+@keyframes jump{30%{transform:translateY(-22px) rotate(-4deg)}60%{transform:none}}
+.fighters-res{display:flex;align-items:flex-end;justify-content:center;gap:10px}
+.res-boss{width:120px;height:120px;object-fit:contain;font-size:84px;line-height:1;display:grid;place-items:center}
+.rankup{animation:rankpop .4s 1.6s cubic-bezier(.2,1.6,.4,1) both}
+@keyframes rankpop{0%{opacity:0;transform:rotate(-3deg) scale(2)}100%{opacity:1;transform:rotate(-3deg) scale(1)}}
+html.calm .pop,html.calm .bob,html.calm .aura,html.calm .result::before,html.calm #app.enter,html.calm .card.from-r,html.calm .card.from-l,html.calm .feedback{animation:none!important}
+html.calm .speed,html.calm .particle,html.calm .blast{display:none!important}
 @media (prefers-reduced-motion:reduce){
   *{animation:none!important;transition:none!important}
   .ono{opacity:1}
+  .stamp{opacity:1}
+  .speed,.particle,.blast{display:none!important}
 }
 </style>
 </head>
@@ -310,7 +361,7 @@ const KEY = 'woordkracht-v1';
 /* =========================================================
    Sauvegarde locale (sur l'appareil)
    ========================================================= */
-const DEFAULTS = {font:'lexend', size:'m', bg:'creme', syl:true, fr:true, sfx:true, rate:0.9, rounds:10, voice:''};
+const DEFAULTS = {font:'lexend', size:'m', bg:'creme', syl:true, fr:true, sfx:true, rate:0.9, rounds:10, voice:'', anim:true};
 let S = load();
 function load(){
   let d = null;
@@ -459,9 +510,15 @@ function rankOf(p){
   return {i, cur, next, pct};
 }
 const BOSSES = [
-  {e:'🐲', n:'De Woordenvreter'}, {e:'👹', n:'Baron Spelfout'}, {e:'🦑', n:'Kapitein Vergeet'},
-  {e:'👾', n:'Mister Moeilijk'}, {e:'🦖', n:'T-Rex Taaltand'}, {e:'🤖', n:'Robot Lidwoord'}
+  {e:'🐲', n:'De Woordenvreter', img:'images/boss-draak.webp'}, {e:'👹', n:'Baron Spelfout', img:'images/boss-baron.webp'},
+  {e:'🦑', n:'Kapitein Vergeet', img:'images/boss-octo.webp'}, {e:'👾', n:'Mister Moeilijk', img:'images/boss-kubus.webp'},
+  {e:'🦖', n:'T-Rex Taaltand', img:'images/boss-trex.webp'}, {e:'🤖', n:'Robot Lidwoord', img:'images/boss-robot.webp'}
 ];
+const MASCOT = 'images/mascotte.webp';
+/* image avec repli sur l'emoji si le fichier manque */
+function imgOr(src, emoji, cls){
+  return `<img src="${esc(src)}" alt="" class="${cls || ''}" onerror="this.replaceWith(document.createTextNode('${emoji}'))">`;
+}
 const ONO = ['BOEM!', 'PATS!', 'KNAL!', 'BAF!', 'ZOEF!', 'KABOEM!'];
 const BRAVO = [['Goed zo!', 'Bien joué !'], ['Super!', 'Super !'], ['Top!', 'Top !'], ['Knap!', 'Fort !'], ['Prima!', 'Parfait !'], ['Geweldig!', 'Génial !']];
 
@@ -474,6 +531,7 @@ function applySettings(){
   h.dataset.size = S.settings.size;
   h.dataset.bg = S.settings.bg;
   document.body.classList.toggle('syl-on', !!S.settings.syl);
+  h.classList.toggle('calm', S.settings.anim === false);
   const m = document.querySelector('meta[name=theme-color]');
   if (m) m.content = S.settings.bg === 'donker' ? '#1A1C22' : '#FFC531';
 }
@@ -482,6 +540,7 @@ function applySettings(){
    ÉCRAN : accueil
    ========================================================= */
 let screen = 'home';
+function enter(){ app.classList.remove('enter'); void app.offsetWidth; app.classList.add('enter'); }
 function themeProgress(t){
   let s = 0; t.mots.forEach(w => { s += Math.min(5, wp(t, w).b); });
   return t.mots.length ? s / (5 * t.mots.length) : 0;
@@ -497,7 +556,7 @@ function home(){
       <button class="icon-btn" data-a="settings" aria-label="Réglages">⚙️</button>
     </header>
     <section class="panel power">
-      <div class="aura">⚡</div>
+      <div class="aura">${imgOr(MASCOT, '⚡', 'mascot bob')}</div>
       <div class="pw-body">
         <div class="pw-rank">${r.cur[1]} <small>(${r.cur[2]})</small></div>
         <div class="pw-num">Krachtniveau : <b>${S.power}</b></div>
@@ -510,8 +569,8 @@ function home(){
     ${groups.map(G => `
       <div class="group-title">${esc(G.n)}</div>
       <div class="themes">
-        ${G.t.map(t => { const p = themeProgress(t); return `
-          <button class="panel theme" data-a="theme" data-t="${esc(t.id)}">
+        ${G.t.map((t, ti) => { const p = themeProgress(t); return `
+          <button class="panel theme pop" style="--i:${ti}" data-a="theme" data-t="${esc(t.id)}">
             <span class="ti">${visual(t.icone, 'sm').replace('v-sm', 'v-sm" style="font-size:40px')}</span>
             <span class="tn">${esc(t.nl)}</span>
             <span class="tf">${esc(t.fr)}</span>
@@ -520,6 +579,7 @@ function home(){
           </button>`; }).join('')}
       </div>`).join('')}
   `;
+  enter();
   window.scrollTo(0, 0);
 }
 
@@ -544,12 +604,13 @@ function themeScreen(id){
     <h2 class="h"><button class="say" data-fr="Touche un mot pour l'écouter." aria-label="Écouter">🔊</button>De woorden <small>(touche pour écouter)</small></h2>
     <div class="wordlist">
       ${t.mots.map((w, i) => { const b = Math.min(5, wp(t, w).b); return `
-        <button class="wl-item" data-a="sayword" data-i="${i}">
+        <button class="wl-item pop" style="--i:${Math.min(i, 12)}" data-a="sayword" data-i="${i}">
           ${visual(w.img, 'sm')}
           <span class="txt">${wordHTML(w, true)}${S.settings.fr ? `<small>${esc(w.fr)}</small>` : ''}</span>
           <span class="dots" aria-label="Maîtrise ${b} sur 5">${[0,1,2,3,4].map(k => `<i class="${k < b ? 'on' : ''}"></i>`).join('')}</span>
         </button>`; }).join('')}
     </div>`;
+  enter();
   window.scrollTo(0, 0);
 }
 
@@ -558,6 +619,7 @@ function themeScreen(id){
    ========================================================= */
 let learnIdx = 0;
 function learn(i){
+  const dir = i > learnIdx ? 'from-r' : i < learnIdx ? 'from-l' : 'pop';
   screen = 'learn';
   const t = curTheme;
   learnIdx = Math.max(0, Math.min(t.mots.length - 1, i));
@@ -565,7 +627,7 @@ function learn(i){
   const last = learnIdx === t.mots.length - 1;
   app.innerHTML = `
     <button class="back" data-a="theme" data-t="${esc(t.id)}">◀ ${esc(t.nl)}</button>
-    <section class="panel card">
+    <section class="panel card ${dir}">
       ${visual(w.img, 'lg')}
       <div class="word-wrap">${wordHTML(w, true).replace('class="word"', 'class="word" style="font-size:1.75em"')}</div>
       <div class="say-row">
@@ -621,8 +683,10 @@ function frame(inner, consigne){
   app.innerHTML = `
     <div class="bt-top">
       <button class="icon-btn" data-a="quit" aria-label="Quitter le combat">✖</button>
-      <div class="panel boss">
-        <span class="boss-face" id="bossFace">${B.boss.e}</span>
+      <div class="panel fighters">
+        <span class="hero" id="hero">${imgOr(MASCOT, '🧑', 'bob')}</span>
+        <span class="vs">VS</span>
+        <span class="boss-face" id="bossFace">${imgOr(B.boss.img, B.boss.e, 'bob')}</span>
         <div class="boss-info"><div class="boss-name">${esc(B.boss.n)}</div><div class="hp"><i id="hpbar" style="width:${Math.round(B.hp / B.hpMax * 100)}%"></i></div></div>
       </div>
       <div class="combo" id="combo">${B.combo >= 2 ? 'x' + B.combo : ''}</div>
@@ -631,6 +695,7 @@ function frame(inner, consigne){
     <div class="consigne"><button class="say" data-fr="${esc(consigne)}" aria-label="Écouter la consigne">🔊</button><span>${esc(consigne)}</span></div>
     <section class="panel stage" id="stage">${inner}</section>
     <div id="fb"></div>`;
+  if (B.pos === 0 && !B.entered){ B.entered = true; enter(); }
   window.scrollTo(0, 0);
 }
 
@@ -658,7 +723,7 @@ const R = {
     q.opts = opts;
     frame(`
       <div class="say-row"><button class="big-say" data-a="sayq" aria-label="Réécouter">🔊</button><button class="slow-say" data-a="sayqslow" aria-label="Écouter lentement">🐢</button></div>
-      <div class="grid4">${opts.map((o, i) => `<button class="opt" data-a="optv" data-i="${i}">${visual(o.img, 'md')}</button>`).join('')}</div>
+      <div class="grid4">${opts.map((o, i) => `<button class="opt pop" style="--i:${i}" data-a="optv" data-i="${i}">${visual(o.img, 'md')}</button>`).join('')}</div>
     `, 'Écoute et touche la bonne image.');
     setTimeout(() => speak(full(w)), 300);
   },
@@ -670,7 +735,7 @@ const R = {
     frame(`
       ${visual(w.img, 'lg')}
       <div style="display:flex;flex-direction:column;gap:10px;width:100%;align-items:center">
-        ${opts.map((o, i) => `<div class="opt-w"><button class="opt" data-a="optw" data-i="${i}">${wordHTML(o, true)}</button><button class="say" data-nl="${esc(full(o))}" aria-label="Écouter ce mot">🔊</button></div>`).join('')}
+        ${opts.map((o, i) => `<div class="opt-w pop" style="--i:${i}"><button class="opt" data-a="optw" data-i="${i}">${wordHTML(o, true)}</button><button class="say" data-nl="${esc(full(o))}" aria-label="Écouter ce mot">🔊</button></div>`).join('')}
       </div>
     `, 'Quel est le bon mot ? Tu peux écouter chaque mot.');
   },
@@ -681,7 +746,7 @@ const R = {
       ${visual(w.img, 'lg')}
       <div class="q-word">${wordHTML(w, false)}</div>
       <button class="slow-say" data-nl="${esc(w.nl)}" aria-label="Écouter">🔊</button>
-      <div class="dehet"><button class="de" data-a="art" data-v="de">de</button><button class="het" data-a="art" data-v="het">het</button></div>
+      <div class="dehet"><button class="de pop" style="--i:1" data-a="art" data-v="de">de</button><button class="het pop" style="--i:2" data-a="art" data-v="het">het</button></div>
     `, 'De ou het ?');
     setTimeout(() => speak(w.nl), 300);
   },
@@ -699,7 +764,7 @@ const R = {
       ${S.settings.fr ? `<div class="fr-cue">${esc(w.fr)}</div>` : ''}
       <div class="say-row"><button class="big-say" data-a="sayq" aria-label="Réécouter">🔊</button><button class="slow-say" data-a="sayqslow" aria-label="Écouter lentement">🐢</button></div>
       <div class="slots" id="slots">${ps.map(() => `<span class="slot"></span>`).join('')}</div>
-      <div class="tiles" id="tiles">${order.map(i => `<button class="tile" data-a="tile" data-i="${i}">${esc(ps[i])}</button>`).join('')}</div>
+      <div class="tiles" id="tiles">${order.map((i, k) => `<button class="tile pop" style="--i:${k}" data-a="tile" data-i="${i}">${esc(ps[i])}</button>`).join('')}</div>
     `, ps[0].length > 1 || ps.length < w.nl.length ? 'Remets les morceaux du mot dans l\'ordre.' : 'Remets les lettres dans l\'ordre.');
     setTimeout(() => speak(full(w)), 300);
   },
@@ -753,6 +818,7 @@ function fillLetter(q, help){
   if (q.pos >= q.chars.length){
     const inp = document.getElementById('typein'); if (inp) inp.blur();
     const ok = q.hidden ? (q.hints <= 1 && q.err <= 2) : (q.err <= 2 && q.hints === 0);
+    lastTap = document.getElementById('letters');
     answer(ok, {soft:true});
   } else markCur(q);
 }
@@ -776,8 +842,8 @@ function renderPairs(q){
   q.sel = null; q.done = 0; q.miss = new Set();
   frame(`
     <div class="pairs">
-      <div class="pcol">${q.left.map(i => `<button class="pbtn" data-a="pl" data-i="${i}">${wordHTML(items[i], true)}</button>`).join('')}</div>
-      <div class="pcol">${q.right.map(i => `<button class="pbtn" data-a="pr" data-i="${i}">${visual(items[i].img, 'sm').replace('v-sm', 'v-sm" style="font-size:48px')}</button>`).join('')}</div>
+      <div class="pcol">${q.left.map((i, k) => `<button class="pbtn pop" style="--i:${k}" data-a="pl" data-i="${i}">${wordHTML(items[i], true)}</button>`).join('')}</div>
+      <div class="pcol">${q.right.map((i, k) => `<button class="pbtn pop" style="--i:${k + 4}" data-a="pr" data-i="${i}">${visual(items[i].img, 'pr')}</button>`).join('')}</div>
     </div>
   `, 'Relie chaque mot à son image. Touche un mot, puis son image.');
 }
@@ -831,14 +897,44 @@ function answer(ok, o){
   save();
   showFeedback(ok, q, o);
 }
+const calm = () => !!document.documentElement.classList.contains('calm') || (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+function center(el){ const r = el.getBoundingClientRect(); return {x:r.left + r.width / 2, y:r.top + r.height / 2}; }
+function burst(x, y, n){
+  if (calm()) return;
+  const cols = ['#FFC531', '#FF9F1C', '#2B9348', '#1E5FC8', '#E63946', '#ffffff'];
+  for (let k = 0; k < (n || 16); k++){
+    const d = document.createElement('i');
+    const a = Math.random() * Math.PI * 2, r = 60 + Math.random() * 90;
+    d.className = 'particle ' + (k % 3 ? 'star' : 'dot');
+    d.style.cssText = `left:${x}px;top:${y}px;background:${pick(cols)};--dx:${Math.cos(a) * r}px;--dy:${Math.sin(a) * r - 30}px;--r:${Math.round(Math.random() * 540 - 270)}deg`;
+    document.body.appendChild(d);
+    setTimeout(() => d.remove(), 800);
+  }
+}
 function hitFx(mult){
-  sfx.ok(); setTimeout(sfx.hit, 120);
-  const face = document.getElementById('bossFace');
-  if (face){ face.classList.remove('hit'); void face.offsetWidth; face.classList.add('hit'); }
-  const hb = document.getElementById('hpbar'); if (hb) hb.style.width = Math.round(B.hp / B.hpMax * 100) + '%';
+  sfx.ok();
+  const hero = document.getElementById('hero'), face = document.getElementById('bossFace');
+  const src = lastTap && document.body.contains(lastTap) ? lastTap : document.getElementById('stage');
+  if (src){ const c = center(src); burst(c.x, c.y, mult > 1 ? 24 : 16); }
+  const impact = () => {
+    sfx.hit();
+    if (face){ face.classList.remove('hit'); void face.offsetWidth; face.classList.add('hit');
+      const c = center(face); const dm = document.createElement('div'); dm.className = 'dmg';
+      dm.style.left = c.x + 'px'; dm.style.top = (c.y - 20) + 'px'; dm.textContent = '-' + mult; document.body.appendChild(dm);
+      setTimeout(() => dm.remove(), 950); burst(c.x, c.y, 10); }
+    const hb = document.getElementById('hpbar'); if (hb) hb.style.width = Math.round(B.hp / B.hpMax * 100) + '%';
+    fx.innerHTML = `<div class="speed"></div><div class="ono">${mult > 1 ? 'COMBO x' + mult + '!' : pick(ONO)}</div>`;
+    setTimeout(() => { fx.innerHTML = ''; }, 900);
+  };
   const cb = document.getElementById('combo'); if (cb) cb.textContent = B.combo >= 2 ? 'x' + B.combo : '';
-  fx.innerHTML = `<div class="speed"></div><div class="ono">${mult > 1 ? 'COMBO x' + mult + '!' : pick(ONO)}</div>`;
-  setTimeout(() => { fx.innerHTML = ''; }, 900);
+  if (hero){ hero.classList.remove('lunge'); void hero.offsetWidth; hero.classList.add('lunge'); }
+  if (hero && face && !calm() && document.body.animate){
+    const a = center(hero), b = center(face);
+    const bl = document.createElement('div'); bl.className = 'blast'; bl.style.left = a.x + 'px'; bl.style.top = a.y + 'px';
+    document.body.appendChild(bl);
+    const an = bl.animate([{transform:'translate(0,0) scale(.4)'}, {transform:`translate(${b.x - a.x}px,${b.y - a.y}px) scale(1.3)`}], {duration:320, easing:'ease-in'});
+    an.onfinish = () => { bl.remove(); impact(); };
+  } else impact();
 }
 function bossLaugh(){
   sfx.ko();
@@ -881,15 +977,21 @@ function endBattle(){
   sfx.win();
   app.innerHTML = `
     <section class="panel result">
-      <div style="font-size:84px;line-height:1;${won ? 'filter:grayscale(1);opacity:.5;transform:rotate(90deg)' : ''}">${B.boss.e}</div>
-      <h1>${won ? 'GEWONNEN!' : 'GOED GEVOCHTEN!'}</h1>
+      <div class="fighters-res">
+        ${imgOr(MASCOT, '🧑', 'res-mascot')}
+        <span class="res-boss ${won ? 'ko-boss' : ''}">${imgOr(B.boss.img, B.boss.e, 'res-boss')}</span>
+      </div>
+      ${won ? '<div class="stamp">K.O.!</div>' : ''}
+      <h1 class="pop" style="--i:3">${won ? 'GEWONNEN!' : 'GOED GEVOCHTEN!'}</h1>
       <div>${won ? `${esc(B.boss.n)} est K.O. ! <small>(gewonnen = gagné)</small>` : `${esc(B.boss.n)} s'est enfui… La prochaine fois, il ne t'échappera pas !`}</div>
       ${after.i > before.i ? `<div class="rankup">Nieuw niveau : ${after.cur[1]} !</div>` : ''}
       <div class="stats">
-        <div class="stat"><b>+${B.gained}</b><small>kracht</small></div>
-        <div class="stat"><b>${B.right} / ${B.total}</b><small>bonnes réponses</small></div>
-        <div class="stat"><b>x${B.best}</b><small>meilleur combo</small></div>
+        <div class="stat pop" style="--i:6"><b>+<span id="countup">0</span></b><small>kracht</small></div>
+        <div class="stat pop" style="--i:7"><b>${B.right} / ${B.total}</b><small>bonnes réponses</small></div>
+        <div class="stat pop" style="--i:8"><b>x${B.best}</b><small>meilleur combo</small></div>
       </div>
+      <div style="width:100%;max-width:420px"><div class="bar"><i id="rbar" style="width:${before.i === after.i ? before.pct : 0}%"></i></div>
+        <small>${after.cur[1]}${after.next ? ` · encore ${after.next[0] - S.power} pour ${after.next[1]}` : ''}</small></div>
     </section>
     ${joke ? `
     <section class="panel joke">
@@ -903,8 +1005,15 @@ function endBattle(){
       <button class="panel big-btn" data-a="theme" data-t="${esc(B.t.id)}"><span class="e">📖</span>${esc(B.t.nl)}<small>Retour au thème</small></button>
       <button class="panel big-btn" data-a="home"><span class="e">🗺️</span>Missies<small>Toutes les missions</small></button>
     </div>`;
+  enter();
   window.scrollTo(0, 0);
-  if (joke) setTimeout(() => speak(joke.nl), 900);
+  /* compteur de puissance et jauge qui se remplit */
+  const target = B.gained, el = document.getElementById('countup'), t0 = performance.now() + 700;
+  const step = now => { const k = Math.max(0, Math.min(1, (now - t0) / 900)); if (el) el.textContent = Math.round(target * (1 - Math.pow(1 - k, 3))); if (k < 1) requestAnimationFrame(step); };
+  if (calm()) { if (el) el.textContent = target; } else requestAnimationFrame(step);
+  setTimeout(() => { const rb = document.getElementById('rbar'); if (rb) rb.style.width = after.pct + '%'; }, 900);
+  if (won) setTimeout(() => { sfx.hit(); const st = document.querySelector('.stamp'); if (st){ const c = center(st); burst(c.x, c.y, 26); } }, 1250);
+  if (joke) setTimeout(() => speak(joke.nl), 1800);
 }
 
 /* =========================================================
@@ -932,6 +1041,8 @@ function settings(){
           <div class="note">Voix utilisée : ${esc((pickVoice('nl') || {name:'aucune'}).name)}</div>
           ${nv.length ? '' : `<div class="warn">Aucune voix néerlandaise trouvée sur cet appareil. Sur iPad : Réglages › Accessibilité › Contenu énoncé › Voix › Néerlandais, puis télécharger « Ellen » (voix flamande).</div>`}</div>
         <div class="set"><label>Questions par combat</label>${seg('rounds', [['6','6'], ['10','10'], ['14','14']])}</div>
+        <div class="set"><label>Animations</label>${seg('anim', [['true','Oui'], ['false','Réduites']])}
+          <div class="note">« Réduites » garde les écrans calmes : utile si les effets le distraient.</div></div>
         <div class="set"><label>Petits sons</label>${seg('sfx', [['true','Oui'], ['false','Non']])}</div>
         <div class="set"><label>Progression</label>
           <button class="danger" data-a="reset">${resetArmed ? 'Sûr ? Touche encore pour tout effacer' : 'Effacer la progression'}</button>
@@ -963,8 +1074,10 @@ function unlock(){
   loadVoices();
 }
 document.addEventListener('touchstart', unlock, {passive:true, once:true});
+let lastTap = null;
 document.addEventListener('click', e => {
   unlock();
+  lastTap = e.target.closest('button') || null;
   const el = e.target.closest('[data-a],[data-nl],[data-fr]');
   if (!el) {
     const tb = e.target.closest('.typebox');
