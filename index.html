@@ -280,6 +280,11 @@ small,.muted{color:var(--ink2)}
 .sheet select{font:inherit;padding:10px;border:2.5px solid var(--line);border-radius:12px;background:var(--panel);color:var(--ink);max-width:100%}
 .note{font-size:.8em;color:var(--ink2);margin-top:6px}
 .warn{background:var(--kobg);color:var(--ink);border:2px solid var(--ko);border-radius:12px;padding:10px 12px;font-size:.85em;margin-top:8px}
+.voices{display:flex;flex-direction:column;gap:6px}
+.vrow{display:flex;gap:8px;align-items:center}
+.vpick{flex:1;text-align:left;padding:10px 14px;border:2.5px solid var(--line);border-radius:12px;background:var(--panel)}
+.vrow.on .vpick{background:var(--energy);color:#1F1B16;font-weight:700}
+.vrow.on .vpick small{color:#4a3d1a}
 .danger{border:2.5px solid var(--boss);color:var(--boss);background:transparent;border-radius:12px;padding:10px 14px}
 
 @media (max-width:560px){
@@ -362,7 +367,7 @@ const KEY = 'woordkracht-v1';
 /* =========================================================
    Sauvegarde locale (sur l'appareil)
    ========================================================= */
-const DEFAULTS = {font:'lexend', size:'m', bg:'creme', syl:true, fr:true, sfx:true, rate:0.9, rounds:10, voice:'', anim:true};
+const DEFAULTS = {font:'lexend', size:'m', bg:'creme', syl:true, fr:true, sfx:true, rate:0.9, slow:0.4, sep:true, rounds:10, voice:'', anim:true};
 let S = load();
 function load(){
   let d = null;
@@ -437,7 +442,10 @@ function pickVoice(lang){
   for (const p of prefs){ const v = voices.find(v => L(v).indexOf(p) === 0); if (v) return v; }
   return null;
 }
-function speak(text, lang, slow){
+/* speak(texte, langue, mode) : mode = undefined (normal), 'slow' (tortue : mot par mot),
+   'syl' (tortue, 2e toucher : syllabe par syllabe). */
+let speakToken = 0;
+function speak(text, lang, mode, w){
   lang = lang || 'nl';
   if (!('speechSynthesis' in window) || !text) return;
   if (!voices.length) loadVoices();
@@ -445,24 +453,59 @@ function speak(text, lang, slow){
     /* les voix ne sont pas encore chargées : on attend un instant plutôt que de
        laisser le navigateur lire le néerlandais avec sa voix française par défaut */
     let done = false;
-    const go = () => { if (done) return; done = true; loadVoices(); say(text, lang, slow); };
+    const go = () => { if (done) return; done = true; loadVoices(); speakNow(text, lang, mode, w); };
     try { speechSynthesis.addEventListener('voiceschanged', go, {once:true}); } catch(e) {}
     setTimeout(go, 900);
     return;
   }
-  say(text, lang, slow);
+  speakNow(text, lang, mode, w);
 }
-function say(text, lang, slow){
+function chunksFor(text, lang, mode, w){
+  if (lang !== 'nl') return {chunks:[text], gap:0};
+  const m = /^(de|het)\s+(.+)$/i.exec(text);
+  const art = m ? m[1] : '', rest = m ? m[2] : text;
+  if (mode === 'syl'){
+    const ps = (w ? parts(w) : rest.split(' ')).filter(p => p !== ' ').map(p => p.replace(/'/g, ''));
+    return {chunks:(art ? [art] : []).concat(ps), gap:420};
+  }
+  if (mode === 'slow') return {chunks:(art ? [art] : []).concat(rest.split(' ')), gap:520};
+  if (art && S.settings.sep) return {chunks:[art, rest], gap:230};
+  return {chunks:[text], gap:0};
+}
+function speakNow(text, lang, mode, w){
   try {
     speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(text);
+    const tok = ++speakToken;
     const v = pickVoice(lang);
-    u.lang = v ? v.lang : (lang === 'nl' ? 'nl-BE' : 'fr-BE');
-    if (v) u.voice = v;
-    u.rate = slow ? 0.55 : (lang === 'nl' ? S.settings.rate : 1);
     lastVoice[lang] = v ? v.name + ' (' + v.lang + ')' : 'aucune';
-    speechSynthesis.speak(u);
+    const {chunks, gap} = chunksFor(text, lang, mode, w);
+    const rate = mode ? S.settings.slow : (lang === 'nl' ? S.settings.rate : 1);
+    let i = 0;
+    const next = () => {
+      if (tok !== speakToken || i >= chunks.length) return;
+      const u = new SpeechSynthesisUtterance(chunks[i++]);
+      u.lang = v ? v.lang : (lang === 'nl' ? 'nl-BE' : 'fr-BE');
+      if (v) u.voice = v;
+      u.rate = rate;
+      let fired = false;
+      const after = () => { if (fired) return; fired = true; setTimeout(next, gap); };
+      u.onend = after; u.onerror = after;
+      /* filet de sécurité si le navigateur oublie de signaler la fin */
+      setTimeout(after, 900 + u.text.length * 160 / rate);
+      speechSynthesis.speak(u);
+    };
+    next();
   } catch(e) {}
+}
+/* la tortue : 1er toucher = lent, mot par mot ; 2e toucher sur le même mot = syllabe par syllabe */
+let lastSlow = {w:null, t:0, lvl:0};
+function slowWord(w){
+  const now = Date.now();
+  const again = lastSlow.w === w && now - lastSlow.t < 10000;
+  const lvl = again ? (lastSlow.lvl === 1 ? 2 : 1) : 1;
+  lastSlow = {w, t:now, lvl};
+  speak(full(w), 'nl', lvl === 2 ? 'syl' : 'slow', w);
+  return lvl;
 }
 const lastVoice = {};
 
@@ -1036,11 +1079,21 @@ function settings(){
           <div class="note">Exemple : ${sylHTML({nl:'boterham', syl:'bo·ter·ham'})}</div></div>
         <div class="set"><label>Afficher le français</label>${seg('fr', [['true','Oui'], ['false','Non']])}</div>
         <div class="set"><label>Vitesse de la voix</label>${seg('rate', [['0.75','Lente'], ['0.9','Normale'], ['1','Rapide']])}</div>
+        <div class="set"><label>Vitesse de la tortue 🐢</label>${seg('slow', [['0.5','Lente'], ['0.4','Très lente'], ['0.3','Escargot']])}
+          <div class="note">La tortue lit l'article puis le mot séparément. Un 2e toucher (🐌) découpe le mot en syllabes.</div></div>
+        <div class="set"><label>Séparer « de / het » du mot</label>${seg('sep', [['true','Oui'], ['false','Non']])}
+          <div class="note">Une petite pause entre l'article et le nom, pour bien entendre les deux.</div></div>
         <div class="set"><label>Voix néerlandaise</label>
-          ${nv.length ? `<select data-a="voice"><option value="">Automatique (flamande si possible)</option>${nv.map(v => `<option value="${esc(v.name)}" ${S.settings.voice === v.name ? 'selected' : ''}>${esc(v.name)} (${esc(v.lang)})</option>`).join('')}</select>` : ''}
-          <button class="hint-btn" data-nl="Hallo! Ik ben je stem. Veel succes met Nederlands!" style="margin-left:8px">🔊 Tester</button>
-          <div class="note">Voix utilisée : ${esc((pickVoice('nl') || {name:'aucune'}).name)}</div>
-          ${nv.length ? '' : `<div class="warn">Aucune voix néerlandaise trouvée sur cet appareil. Sur iPad : Réglages › Accessibilité › Contenu énoncé › Voix › Néerlandais, puis télécharger « Ellen » (voix flamande).</div>`}</div>
+          <div class="voices">
+            <div class="vrow ${!S.settings.voice ? 'on' : ''}"><button class="vpick" data-a="voicepick" data-v="">Automatique <small>(flamande si possible)</small></button></div>
+            ${nv.map(v => `<div class="vrow ${S.settings.voice === v.name ? 'on' : ''}">
+              <button class="vpick" data-a="voicepick" data-v="${esc(v.name)}">${esc(v.name)} <small>${/nl.be/i.test(v.lang) ? 'Flandre' : 'Pays-Bas'}${v.localService === false ? ' · en ligne' : ''}</small></button>
+              <button class="say" data-a="voicetest" data-v="${esc(v.name)}" aria-label="Écouter cette voix">🔊</button></div>`).join('')}
+          </div>
+          <div class="note">Voix utilisée : ${esc((pickVoice('nl') || {name:'aucune'}).name)}. Les voix « en ligne » demandent une connexion internet.</div>
+          ${nv.length ? '' : `<div class="warn">Aucune voix néerlandaise trouvée sur cet appareil.</div>`}
+          <details class="note" style="margin-top:8px"><summary>Ajouter des voix sur l'iPad</summary>
+            Réglages › Accessibilité › Contenu énoncé › Voix › Néerlandais. Télécharge les voix proposées (Ellen est la voix flamande), de préférence en version « améliorée » ou « premium » quand elle existe : elles sont plus naturelles. Ferme puis rouvre l'appli ensuite pour qu'elle les voie.</details></div>
         <div class="set"><label>Questions par combat</label>${seg('rounds', [['6','6'], ['10','10'], ['14','14']])}</div>
         <div class="set"><label>Animations</label>${seg('anim', [['true','Oui'], ['false','Réduites']])}
           <div class="note">« Réduites » garde les écrans calmes : utile si les effets le distraient.</div></div>
@@ -1053,7 +1106,7 @@ function settings(){
 }
 function setSetting(k, v){
   if (v === 'true') v = true; else if (v === 'false') v = false;
-  else if (k === 'rate' || k === 'rounds') v = Number(v);
+  else if (k === 'rate' || k === 'rounds' || k === 'slow') v = Number(v);
   S.settings[k] = v; save(); applySettings(); settings();
 }
 function closeSettings(){
@@ -1076,6 +1129,7 @@ function unlock(){
 }
 document.addEventListener('touchstart', unlock, {passive:true, once:true});
 let lastTap = null;
+function turtleFx(el, lvl){ if (!el) return; el.textContent = lvl === 2 ? '🐌' : '🐢'; el.title = lvl === 2 ? 'Syllabe par syllabe' : 'Lentement'; }
 document.addEventListener('click', e => {
   unlock();
   lastTap = e.target.closest('button') || null;
@@ -1096,6 +1150,8 @@ document.addEventListener('click', e => {
     case 'settings': settings(); break;
     case 'close': case 'closebg': closeSettings(); break;
     case 'set': setSetting(el.dataset.k, el.dataset.v); break;
+    case 'voicepick': S.settings.voice = el.dataset.v; save(); settings(); speak('Hallo! Ik ben je stem. De keuken, het huis.'); break;
+    case 'voicetest': { const keep = S.settings.voice; S.settings.voice = el.dataset.v; speak('Hallo! De keuken, het huis.'); S.settings.voice = keep; break; }
     case 'reset':
       if (!resetArmed){ resetArmed = true; settings(); }
       else { S.power = 0; S.words = {}; S.sessions = 0; resetArmed = false; save(); settings(); }
@@ -1105,12 +1161,12 @@ document.addEventListener('click', e => {
     case 'prev': learn(learnIdx - 1); break;
     case 'next': learn(learnIdx + 1); break;
     case 'saycard': speak(full(curTheme.mots[learnIdx])); break;
-    case 'saycardslow': speak(full(curTheme.mots[learnIdx]), 'nl', true); break;
+    case 'saycardslow': turtleFx(el, slowWord(curTheme.mots[learnIdx])); break;
     case 'showfr': { const f = document.getElementById('frx'); if (f) f.classList.remove('hidden'); el.remove(); break; }
     case 'fight': startBattle(); break;
     case 'quit': B = null; themeScreen(curTheme.id); break;
     case 'sayq': if (q && q.w) speak(q.type === 'dehet' ? q.w.nl : full(q.w)); { const i = document.getElementById('typein'); if (i) i.focus(); } break;
-    case 'sayqslow': if (q && q.w) speak(full(q.w), 'nl', true); { const i = document.getElementById('typein'); if (i) i.focus(); } break;
+    case 'sayqslow': if (q && q.w) turtleFx(el, slowWord(q.w)); { const i = document.getElementById('typein'); if (i) i.focus(); } break;
     case 'optv': case 'optw': {
       if (!q || B.answered) break;
       const o = q.opts[+el.dataset.i];
@@ -1154,7 +1210,7 @@ document.addEventListener('click', e => {
   }
 });
 document.addEventListener('change', e => {
-  if (e.target.dataset && e.target.dataset.a === 'voice'){ S.settings.voice = e.target.value; save(); speak('Hallo! Dit is mijn stem.'); }
+
 });
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape' && modal.innerHTML) closeSettings();

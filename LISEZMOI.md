@@ -27,6 +27,10 @@ Chaque mot a un niveau de 0 à 6, enregistré sur l'iPad. Le type d'exercice sui
 
 Une épreuve de paires (mots et images) s'insère dans chaque combat.
 
+## La voix
+
+Le bouton 🔊 lit le mot avec une courte pause entre l'article et le nom. La tortue 🐢 lit beaucoup plus lentement, mot par mot ; un deuxième toucher (🐌) découpe le mot en syllabes. Les vitesses et la voix se règlent dans la roue dentée, où chaque voix néerlandaise installée sur l'appareil peut être écoutée puis choisie.
+
 ## Ajouter des mots
 
 Ouvre `contenu.js` avec un éditeur de texte (TextEdit en mode « texte brut », ou mieux, VS Code). Chaque mot tient sur une ligne :

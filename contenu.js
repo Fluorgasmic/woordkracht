@@ -31,7 +31,7 @@ window.CONTENU = {
         { nl: "zich wassen", fr: "se laver", syl: "zich was·sen", img: "images/zich-wassen.webp", zin: "Ik was me in de badkamer.", zinFr: "Je me lave dans la salle de bain." },
         { nl: "tanden poetsen", fr: "se brosser les dents", syl: "tan·den poet·sen", img: "images/tanden-poetsen.webp", zin: "Ik poets mijn tanden.", zinFr: "Je me brosse les dents." },
         { nl: "zich aankleden", fr: "s'habiller", syl: "zich aan·kle·den", img: "images/aankleden.webp", zin: "Ik kleed me aan.", zinFr: "Je m'habille." },
-        { nl: "een douche nemen", fr: "prendre une douche", syl: "een dou·che ne·men", img: "🚿", zin: "Ik neem een douche.", zinFr: "Je prends une douche." },
+        { nl: "een douche nemen", fr: "prendre une douche", syl: "een dou·che ne·men", img: "images/douche.webp", zin: "Ik neem een douche.", zinFr: "Je prends une douche." },
         { nl: "naar school gaan", fr: "aller à l'école", syl: "naar school gaan", img: "images/naar-school.webp", zin: "Ik ga met de fiets naar school.", zinFr: "Je vais à l'école à vélo." },
         { nl: "thuiskomen", fr: "rentrer à la maison", syl: "thuis·ko·men", img: "images/thuiskomen.webp", zin: "Ik kom om 4 uur thuis.", zinFr: "Je rentre à la maison à 4 heures." },
         { nl: "huiswerk maken", fr: "faire ses devoirs", syl: "huis·werk ma·ken", img: "images/huiswerk.webp", zin: "Ik maak mijn huiswerk.", zinFr: "Je fais mes devoirs." },
